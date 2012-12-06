@@ -13,11 +13,14 @@ struct sResult {
   int	size;
 };
 
-typedef sMap Map;
-typedef sResult Result;
+typedef struct sMap Map;
+typedef struct sResult Result;
 
-void	initMap(Map* m, char *fileName);
+int	initMap(Map* m, char *fileName);
+void	iterOnMap(Map* m, Result* res, void (*func)(Map*, Result*, int, int), void (*end_func)(Map*, Result*, int, int));
 Result*	solveMap(Map* m);
 
+int	isFree(char **map, int i, int j);
+void	canMakeSquare(Map* m, Result* res, int i, int j);
 
 #endif
