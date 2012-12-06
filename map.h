@@ -21,7 +21,7 @@ int	initMap(Map* m, char *fileName);
 void	iterOnMap(Map* m, Result* res, void (*func)(Map*, Result*, int, int), void (*end_func)(Map*, Result*, int, int));
 Result*	solveMap(Map* m);
 
-int	isFree(char **map, int i, int j);
+int	isFree(Map* m, int i, int j);
 void	canMakeSquare(Map* m, Result* res, int i, int j);
 
 #endif

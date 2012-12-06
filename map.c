@@ -29,36 +29,6 @@
 
 */
 
-void
-displayBinary(Map* m, char *tab) {
-  int stop = ceil(m->sizeY * m->sizeX / 8.0f);
-  int i = 0;
-
-  while (i < stop) {
-    printf("--%d--\n", tab[i]);
-    ++i;
-  }
-  /*  int stop = m->sizeY * m->sizeX;
-
-  int nbBits = 0;
-  int i = 0;
-  while (nbBits < stop) {
-    int j = sizeof(char) * 8 - 1;
-    int j2 = 0;
-    while (j >= 0) {
-      if (((i * 8) + j2) % m->sizeX == 0)
-	printf("\n");
-      printf("-%d-", (tab[i] >> j) & 1);
-      ++j2;
-      --j;
-      ++nbBits;
-    }
-    ++nbBits;
-    ++i;
-  }
-  */
-}
-
 int
 initMap(Map *m, char *fileName) {
   int fd = open(fileName, O_RDONLY);
@@ -87,32 +57,20 @@ initMap(Map *m, char *fileName) {
       if (s[i] == 'o') {
 	int index1d = (j * m->sizeX + i);
 	int indexBitField = index1d / 8;
-	m->map[indexBitField] |= (1 << (8 - (index1d - (indexBitField * 8))));
+	m->map[indexBitField] |= (1 << (7 - (index1d - (indexBitField * 8))));
       }
       ++i;
     }
     ++j;
   } while ((s = get_next_line(fd)));
-
-  displayBinary(m, m->map);
-  exit(1);
   return 0;
 }
-/*
-  if ((m->tab = malloc(sizeof(*m->tab) * (m->sizeY + 1))) == 0) return -1;
-  int i = 0;
-  while (i != m->sizeY) {
-    m->tab[i] = get_next_line(fd);
-    if (m->tab[i] == 0) return -1;
-    m->sizeX = strlen(m->tab[i]);
-    ++i;
-  }
-  m->tab[i] = 0;
-  */
-
 int
-isFree(char **map, int i, int j) {
-  return map[i][j] == '.' && map[i][j] != '\0';
+isFree(Map* m, int i, int j) {
+  int index1d = (m->sizeX * i + j);
+  int indexBitField = index1d / 8;
+
+  return (((m->map[indexBitField] >> (7 - (index1d - (indexBitField * 8)))) & 1) == 0);
 }
 
 void
@@ -128,7 +86,7 @@ canMakeSquare(Map* m, Result* res, int startX, int startY) {
     while (i != endI) {
       int j = startX;
       while (j != endJ) {
-	if (isFree(m->tab, i, j) == 0) {
+	if (isFree(m, i, j) == 0) {
 	  return ;
 	}
 	++j;
@@ -139,40 +97,6 @@ canMakeSquare(Map* m, Result* res, int startX, int startY) {
     res->y = startY;
     res->size = trySize;
     ++trySize;
-  }
-}
-
-Result*
-solveMap(Map *m) {
-  Result* res = malloc(sizeof(*res));
-  if (res == 0) return 0;
-  res->x = 0;
-  res->y = 0;
-
-  int y = 0;
-  while (y < m->sizeY) {
-    int x = 0;
-    while (x < m->sizeX) {
-      canMakeSquare(m, res, x, y);
-      ++x;
-    }
-    ++y;
-  }
-  return res;
-}
-
-void
-displayMap(Map *m) {
-  int i = 0;
-  printf("size : %d %d\n", m->sizeX, m->sizeY);
-  while (i < m->sizeY) {
-    int j = 0;
-    while (j < m->sizeX) {
-      printf("%c", m->tab[i][j]);
-      ++j;
-    }
-    printf("\n");
-    ++i;
   }
 }
 
