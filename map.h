@@ -5,6 +5,7 @@ struct sMap {
   int	sizeX;
   int	sizeY;
   char	**tab; // doing it with double tab but going to convert it into a bitfield
+  char	*map;
 };
 
 struct sResult {

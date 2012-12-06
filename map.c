@@ -2,8 +2,62 @@
 #include <fcntl.h>
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
 #include "get_next_line.h"
 #include "map.h"
+
+/*
+  [.....]
+  [.....]
+  [....x]
+  [.....]
+  [.....]
+
+
+  x:4, y:2 => 14
+  sizeline = 5
+  sizeline * y + x = 14
+
+  recuperation de l'index du tableau
+  14 / 8 == 1
+
+  recuperation du 6ieme bit
+  14 - (index * 8) = 6
+
+
+  [00000000][00000100][00000000][00000000]
+
+*/
+
+void
+displayBinary(Map* m, char *tab) {
+  int stop = ceil(m->sizeY * m->sizeX / 8.0f);
+  int i = 0;
+
+  while (i < stop) {
+    printf("--%d--\n", tab[i]);
+    ++i;
+  }
+  /*  int stop = m->sizeY * m->sizeX;
+
+  int nbBits = 0;
+  int i = 0;
+  while (nbBits < stop) {
+    int j = sizeof(char) * 8 - 1;
+    int j2 = 0;
+    while (j >= 0) {
+      if (((i * 8) + j2) % m->sizeX == 0)
+	printf("\n");
+      printf("-%d-", (tab[i] >> j) & 1);
+      ++j2;
+      --j;
+      ++nbBits;
+    }
+    ++nbBits;
+    ++i;
+  }
+  */
+}
 
 int
 initMap(Map *m, char *fileName) {
@@ -16,10 +70,36 @@ initMap(Map *m, char *fileName) {
   char *s = get_next_line(fd);
   if (s == 0) return -1;
 
-  int sizeY = atoi(s);
-  m->sizeY = sizeY;
-  if ((m->tab = malloc(sizeof(*m->tab) * (m->sizeY + 1))) == 0) return -1;
+  m->sizeY = atoi(s);
 
+  s = get_next_line(fd);
+  if (s == 0) return -1;
+  m->sizeX = strlen(s);
+
+  m->map = malloc(sizeof(*m->map) * ceil(((m->sizeY + m->sizeX) / 8.0f)));
+  if (m->map == 0) return -1;
+  memset(m->map, 0, (m->sizeY + m->sizeX) / 8);
+
+  int j = 0;
+  do {
+    int i = 0;
+    while (i != m->sizeX) {
+      if (s[i] == 'o') {
+	int index1d = (j * m->sizeX + i);
+	int indexBitField = index1d / 8;
+	m->map[indexBitField] |= (1 << (8 - (index1d - (indexBitField * 8))));
+      }
+      ++i;
+    }
+    ++j;
+  } while ((s = get_next_line(fd)));
+
+  displayBinary(m, m->map);
+  exit(1);
+  return 0;
+}
+/*
+  if ((m->tab = malloc(sizeof(*m->tab) * (m->sizeY + 1))) == 0) return -1;
   int i = 0;
   while (i != m->sizeY) {
     m->tab[i] = get_next_line(fd);
@@ -28,8 +108,7 @@ initMap(Map *m, char *fileName) {
     ++i;
   }
   m->tab[i] = 0;
-  return 0;
-}
+  */
 
 int
 isFree(char **map, int i, int j) {
