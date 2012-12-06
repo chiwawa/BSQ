@@ -38,24 +38,28 @@ isFree(char **map, int i, int j) {
 
 void
 canMakeSquare(Map* m, Result* res, int startX, int startY) {
+  int trySize = res->size;
   while (1) {
-    int i = startX;
-    int endI = startY + res->size;
-    if (endI > m->sizeY) return ;
+    int i = startY;
+    int endI = startY + trySize;
+    int endJ = startX + trySize;
+    if (endI > m->sizeY || endJ > m->sizeX) {
+      return ;
+    }
     while (i != endI) {
       int j = startX;
-      int endJ = startX + res->size;
-      if (endJ > m->sizeX) return ;
       while (j != endJ) {
-	if (isFree(m->tab, i, j) == 0)
+	if (isFree(m->tab, i, j) == 0) {
 	  return ;
+	}
 	++j;
       }
       ++i;
     }
     res->x = startX;
     res->y = startY;
-    ++res->size;
+    res->size = trySize;
+    ++trySize;
   }
 }
 
